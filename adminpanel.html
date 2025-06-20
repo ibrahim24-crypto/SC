@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: #4facfe;
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 12px;
+        }
+        
+        .card-header i {
+            font-size: 1.8rem;
+            color: #4facfe;
+            background: rgba(79, 172, 254, 0.15);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+        
+        .card p {
+            color: #a0b3d6;
+            font-size: 0.9rem;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .chart-header h2 {
+            font-size: 1.5rem;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .chart-wrapper {
+            height: 350px;
+            position: relative;
+        }
+        
+        .visitors-list {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .visitors-list h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .visitor-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 15px;
+        }
+        
+        .visitor-item:last-child {
+            border-bottom: none;
+        }
+        
+        .visitor-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .visitor-info {
+            flex: 1;
+        }
+        
+        .visitor-info h3 {
+            margin-bottom: 5px;
+        }
+        
+        .visitor-info p {
+            color: #a0b3d6;
+            font-size: 0.9rem;
+        }
+        
+        .visitor-time {
+            color: #4facfe;
+            font-weight: bold;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 40px;
+            color: #a0b3d6;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .highlight {
+            color: #4facfe;
+            font-weight: bold;
+        }
+        
+        /* Animation for stats */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h1>Analytics Dashboard</h1>
+            </div>
+            <div class="controls">
+                <button class="btn" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i> Rafraîchir
+                </button>
+                <button class="btn" id="simulateBtn">
+                    <i class="fas fa-user-plus"></i> Simuler Visiteur
+                </button>
+            </div>
+        </header>
+        
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-users"></i>
+                    <div>
+                        <h2>Visiteurs Totaux</h2>
+                        <p>Depuis le lancement</p>
+                    </div>
+                </div>
+                <div class="stat-value" id="totalVisitors">0</div>
+                <div class="card-footer">
+                    <p><span class="highlight" id="todayVisitors">0</span> visiteurs aujourd'hui</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-user-clock"></i>
+                    <div>
+                        <h2>Durée Moyenne</h2>
+                        <p>Par session</p>
+                    </div>
+                </div>
+                <div class="stat-value" id="avgDuration">0s</div>
+                <div class="card-footer">
+                    <p>Session actuelle: <span class="highlight" id="currentDuration">0s</span></p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-arrow-rotate-right"></i>
+                    <div>
+                        <h2>Taux de Retour</h2>
+                        <p>Visiteurs récurrents</p>
+                    </div>
+                </div>
+                <div class="stat-value" id="returnRate">0%</div>
+                <div class="card-footer">
+                    <p><span class="highlight" id="newVisitors">0</span> nouveaux visiteurs</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-globe"></i>
+                    <div>
+                        <h2>Sources</h2>
+                        <p>Trafic par origine</p>
+                    </div>
+                </div>
+                <div class="stat-value" id="mobileRate">0%</div>
+                <div class="card-footer">
+                    <p><span class="highlight" id="desktopRate">0%</span> desktop, <span class="highlight" id="tabletRate">0%</span> tablette</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2>Activité des Visiteurs (7 jours)</h2>
+                <div class="filters">
+                    <button class="btn small">
+                        <i class="fas fa-calendar"></i> Dernière semaine
+                    </button>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="visitorsChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="visitors-list">
+            <h2>Derniers Visiteurs</h2>
+            <div id="visitorsContainer">
+                <!-- Visitor items will be added here -->
+            </div>
+        </div>
+        
+        <footer>
+            <p>Données synchronisées avec <span class="highlight">Firebase Analytics</span> et stockées localement</p>
+            <p>Dernière mise à jour: <span id="lastUpdated">Chargement...</span></p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB5y97C6OC5HLMB9WkdII5PpUOsfFtdqgk",
+            authDomain: "screen-clicker-2010.firebaseapp.com",
+            projectId: "screen-clicker-2010",
+            storageBucket: "screen-clicker-2010.firebasestorage.app",
+            messagingSenderId: "47509252596",
+            appId: "1:47509252596:web:b9e49f5b0ca9ff6b8a71a1",
+            measurementId: "G-WF9SYRQBVT"
+        };
+
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const analytics = firebase.analytics();
+        
+        // Envoyer un événement de visite
+        analytics.logEvent('page_view', {
+            page_title: 'Analytics Dashboard',
+            page_location: window.location.href
+        });
+        
+        // Fonctions de gestion des données
+        const AnalyticsManager = {
+            // Initialiser les données
+            init() {
+                // Vérifier si c'est la première visite
+                if (!localStorage.getItem('firstVisit')) {
+                    const now = new Date();
+                    localStorage.setItem('firstVisit', now.toISOString());
+                    localStorage.setItem('lastVisit', now.toISOString());
+                    localStorage.setItem('totalVisits', '1');
+                    localStorage.setItem('returningVisitor', 'false');
+                    localStorage.setItem('visitsToday', '1');
+                    
+                    // Créer le tableau de visiteurs
+                    localStorage.setItem('visitors', JSON.stringify([]));
+                    
+                    // Créer le tableau d'historique
+                    const history = {};
+                    history[this.getDateKey(now)] = 1;
+                    localStorage.setItem('visitHistory', JSON.stringify(history));
+                    
+                    // Créer le tableau de durée
+                    localStorage.setItem('durations', JSON.stringify([]));
+                    
+                    // Créer le tableau de devices
+                    localStorage.setItem('devices', JSON.stringify({
+                        desktop: 0,
+                        mobile: 0,
+                        tablet: 0
+                    }));
+                    
+                    // Créer le tableau de sources
+                    localStorage.setItem('sources', JSON.stringify({
+                        direct: 0,
+                        search: 0,
+                        social: 0
+                    }));
+                } else {
+                    // Mettre à jour les visites
+                    const totalVisits = parseInt(localStorage.getItem('totalVisits')) + 1;
+                    localStorage.setItem('totalVisits', totalVisits.toString());
+                    
+                    const lastVisit = new Date(localStorage.getItem('lastVisit'));
+                    const now = new Date();
+                    localStorage.setItem('lastVisit', now.toISOString());
+                    
+                    // Vérifier si c'est le même jour
+                    if (lastVisit.toDateString() === now.toDateString()) {
+                        const visitsToday = parseInt(localStorage.getItem('visitsToday')) + 1;
+                        localStorage.setItem('visitsToday', visitsToday.toString());
+                    } else {
+                        localStorage.setItem('visitsToday', '1');
+                    }
+                    
+                    // Vérifier si c'est un visiteur récurrent
+                    if (localStorage.getItem('returningVisitor') === 'false') {
+                        localStorage.setItem('returningVisitor', 'true');
+                    }
+                    
+                    // Mettre à jour l'historique
+                    const history = JSON.parse(localStorage.getItem('visitHistory'));
+                    const dateKey = this.getDateKey(now);
+                    
+                    if (history[dateKey]) {
+                        history[dateKey]++;
+                    } else {
+                        history[dateKey] = 1;
+                    }
+                    
+                    localStorage.setItem('visitHistory', JSON.stringify(history));
+                    
+                    // Enregistrer le device
+                    const devices = JSON.parse(localStorage.getItem('devices'));
+                    const deviceType = this.getDeviceType();
+                    devices[deviceType]++;
+                    localStorage.setItem('devices', JSON.stringify(devices));
+                }
+                
+                // Enregistrer le début de la session
+                sessionStorage.setItem('sessionStart', Date.now());
+                
+                // Mettre à jour l'affichage
+                this.updateUI();
+                this.updateCharts();
+                this.updateVisitorsList();
+            },
+            
+            // Obtenir le type d'appareil
+            getDeviceType() {
+                const width = window.innerWidth;
+                if (width < 768) return 'mobile';
+                if (width < 992) return 'tablet';
+                return 'desktop';
+            },
+            
+            // Obtenir la clé de date pour l'historique
+            getDateKey(date) {
+                return date.toISOString().split('T')[0];
+            },
+            
+            // Calculer la durée moyenne des sessions
+            calculateAvgDuration() {
+                const durations = JSON.parse(localStorage.getItem('durations'));
+                if (durations.length === 0) return 0;
+                
+                const total = durations.reduce((sum, duration) => sum + duration, 0);
+                return Math.round(total / durations.length);
+            },
+            
+            // Mettre à jour l'interface
+            updateUI() {
+                // Visiteurs totaux
+                document.getElementById('totalVisitors').textContent = 
+                    localStorage.getItem('totalVisits');
+                
+                // Visiteurs aujourd'hui
+                document.getElementById('todayVisitors').textContent = 
+                    localStorage.getItem('visitsToday');
+                
+                // Durée moyenne
+                const avgDuration = this.calculateAvgDuration();
+                document.getElementById('avgDuration').textContent = 
+                    `${avgDuration}s`;
+                
+                // Taux de retour
+                const totalVisits = parseInt(localStorage.getItem('totalVisits'));
+                const returningVisits = totalVisits - 1; // première visite n'est pas un retour
+                const returnRate = Math.round((returningVisits / totalVisits) * 100);
+                document.getElementById('returnRate').textContent = 
+                    `${returnRate}%`;
+                
+                // Nouveaux visiteurs
+                document.getElementById('newVisitors').textContent = 
+                    localStorage.getItem('returningVisitor') === 'false' ? '1' : '0';
+                
+                // Données appareils
+                const devices = JSON.parse(localStorage.getItem('devices'));
+                const totalDevices = devices.desktop + devices.mobile + devices.tablet;
+                
+                if (totalDevices > 0) {
+                    const mobileRate = Math.round((devices.mobile / totalDevices) * 100);
+                    const desktopRate = Math.round((devices.desktop / totalDevices) * 100);
+                    const tabletRate = Math.round((devices.tablet / totalDevices) * 100);
+                    
+                    document.getElementById('mobileRate').textContent = 
+                        `${mobileRate}%`;
+                    document.getElementById('desktopRate').textContent = 
+                        `${desktopRate}%`;
+                    document.getElementById('tabletRate').textContent = 
+                        `${tabletRate}%`;
+                }
+                
+                // Dernière mise à jour
+                document.getElementById('lastUpdated').textContent = 
+                    new Date().toLocaleTimeString();
+            },
+            
+            // Mettre à jour les graphiques
+            updateCharts() {
+                const history = JSON.parse(localStorage.getItem('visitHistory'));
+                const dates = Object.keys(history).sort().slice(-7);
+                const counts = dates.map(date => history[date]);
+                
+                // Graphique des visiteurs
+                const ctx = document.getElementById('visitorsChart').getContext('2d');
+                
+                if (window.visitorsChart) {
+                    window.visitorsChart.destroy();
+                }
+                
+                window.visitorsChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: 'Visiteurs',
+                            data: counts,
+                            backgroundColor: 'rgba(79, 172, 254, 0.7)',
+                            borderColor: 'rgba(79, 172, 254, 1)',
+                            borderWidth: 1,
+                            borderRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#a0b3d6'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#a0b3d6'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#fff'
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+            
+            // Mettre à jour la liste des visiteurs
+            updateVisitorsList() {
+                const visitorsContainer = document.getElementById('visitorsContainer');
+                const visitors = JSON.parse(localStorage.getItem('visitors'));
+                
+                // Trier par date récente
+                visitors.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                // Afficher les 5 derniers visiteurs
+                const recentVisitors = visitors.slice(0, 5);
+                visitorsContainer.innerHTML = '';
+                
+                recentVisitors.forEach(visitor => {
+                    const visitorEl = document.createElement('div');
+                    visitorEl.className = 'visitor-item';
+                    
+                    // Calculer le temps écoulé
+                    const now = new Date();
+                    const visitTime = new Date(visitor.timestamp);
+                    const diffMinutes = Math.floor((now - visitTime) / (1000 * 60));
+                    
+                    let timeAgo;
+                    if (diffMinutes < 1) {
+                        timeAgo = "À l'instant";
+                    } else if (diffMinutes < 60) {
+                        timeAgo = `Il y a ${diffMinutes} min`;
+                    } else {
+                        const diffHours = Math.floor(diffMinutes / 60);
+                        timeAgo = `Il y a ${diffHours} h`;
+                    }
+                    
+                    visitorEl.innerHTML = `
+                        <div class="visitor-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="visitor-info">
+                            <h3>${visitor.source} - ${visitor.device}</h3>
+                            <p>${visitTime.toLocaleString()}</p>
+                        </div>
+                        <div class="visitor-time">${timeAgo}</div>
+                    `;
+                    
+                    visitorsContainer.appendChild(visitorEl);
+                });
+            },
+            
+            // Ajouter un visiteur simulé
+            addSimulatedVisitor() {
+                const sources = ['direct', 'search', 'social'];
+                const devices = ['desktop', 'mobile', 'tablet'];
+                
+                const source = sources[Math.floor(Math.random() * sources.length)];
+                const device = devices[Math.floor(Math.random() * devices.length)];
+                
+                const visitor = {
+                    timestamp: new Date().toISOString(),
+                    source: source,
+                    device: device
+                };
+                
+                // Ajouter aux visiteurs
+                const visitors = JSON.parse(localStorage.getItem('visitors'));
+                visitors.push(visitor);
+                localStorage.setItem('visitors', JSON.stringify(visitors));
+                
+                // Mettre à jour les appareils
+                const devicesData = JSON.parse(localStorage.getItem('devices'));
+                devicesData[device]++;
+                localStorage.setItem('devices', JSON.stringify(devicesData));
+                
+                // Mettre à jour les sources
+                const sourcesData = JSON.parse(localStorage.getItem('sources'));
+                sourcesData[source]++;
+                localStorage.setItem('sources', JSON.stringify(sourcesData));
+                
+                // Mettre à jour les visites
+                const totalVisits = parseInt(localStorage.getItem('totalVisits')) + 1;
+                localStorage.setItem('totalVisits', totalVisits.toString());
+                
+                const visitsToday = parseInt(localStorage.getItem('visitsToday')) + 1;
+                localStorage.setItem('visitsToday', visitsToday.toString());
+                
+                // Mettre à jour l'historique
+                const now = new Date();
+                const history = JSON.parse(localStorage.getItem('visitHistory'));
+                const dateKey = this.getDateKey(now);
+                
+                if (history[dateKey]) {
+                    history[dateKey]++;
+                } else {
+                    history[dateKey] = 1;
+                }
+                
+                localStorage.setItem('visitHistory', JSON.stringify(history));
+                
+                // Envoyer un événement à Firebase
+                analytics.logEvent('simulated_visit', {
+                    source: source,
+                    device: device
+                });
+                
+                // Mettre à jour l'UI
+                this.updateUI();
+                this.updateCharts();
+                this.updateVisitorsList();
+                
+                // Ajouter un effet visuel
+                document.querySelectorAll('.stat-value').forEach(el => {
+                    el.classList.add('pulse');
+                    setTimeout(() => el.classList.remove('pulse'), 2000);
+                });
+            },
+            
+            // Enregistrer la durée de la session
+            trackSessionDuration() {
+                const sessionStart = parseInt(sessionStorage.getItem('sessionStart'));
+                if (!sessionStart) return;
+                
+                const duration = Math.floor((Date.now() - sessionStart) / 1000);
+                
+                // Ajouter à la liste des durées
+                const durations = JSON.parse(localStorage.getItem('durations'));
+                durations.push(duration);
+                localStorage.setItem('durations', JSON.stringify(durations));
+                
+                // Mettre à jour l'affichage
+                document.getElementById('currentDuration').textContent = `${duration}s`;
+                
+                // Envoyer l'événement à Firebase
+                analytics.logEvent('session_end', {
+                    duration: duration
+                });
+            }
+        };
+        
+        // Initialiser le tableau de bord
+        AnalyticsManager.init();
+        
+        // Gestion des événements
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            AnalyticsManager.updateUI();
+            AnalyticsManager.updateCharts();
+            AnalyticsManager.updateVisitorsList();
+            
+            // Ajouter un effet visuel
+            document.querySelectorAll('.stat-value').forEach(el => {
+                el.classList.add('pulse');
+                setTimeout(() => el.classList.remove('pulse'), 1000);
+            });
+            
+            // Mettre à jour l'heure
+            document.getElementById('lastUpdated').textContent = 
+                new Date().toLocaleTimeString();
+        });
+        
+        document.getElementById('simulateBtn').addEventListener('click', () => {
+            AnalyticsManager.addSimulatedVisitor();
+        });
+        
+        // Enregistrer la durée de la session à la fermeture de la page
+        window.addEventListener('beforeunload', () => {
+            AnalyticsManager.trackSessionDuration();
+        });
+        
+        // Mettre à jour la durée actuelle toutes les secondes
+        setInterval(() => {
+            const sessionStart = parseInt(sessionStorage.getItem('sessionStart'));
+            if (sessionStart) {
+                const duration = Math.floor((Date.now() - sessionStart) / 1000);
+                document.getElementById('currentDuration').textContent = `${duration}s`;
+            }
+        }, 1000);
+        
+        // Initialiser le graphique avec un espace réservé
+        window.visitorsChart = new Chart(
+            document.getElementById('visitorsChart').getContext('2d'), 
+            { type: 'bar' }
+        );
+    </script>
+</body>
+</html>
