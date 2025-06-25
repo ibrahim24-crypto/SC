@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-site-verification" content="mTrU3ER_W6ZQlMRqOs6YUMYB7srlXkvelK9UaaChGvc" />
     <title>Screen Clicker Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
-<style>
-        /* Styles généraux */
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -27,7 +25,6 @@
             color: #fff;
         }
         
-        /* Loading overlay */
         #loadingOverlay {
             position: fixed;
             top: 0;
@@ -83,7 +80,6 @@
             100% { width: 100%; }
         }
         
-        /* Auth screens */
         #authMenu, #usernamePrompt {
             position: fixed;
             top: 0;
@@ -137,18 +133,6 @@
         .auth-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-        }
-        
-        .auth-btn:active {
-            transform: translateY(1px);
-        }
-        
-        .google-btn {
-            background: linear-gradient(90deg, #4285F4, #34A853, #FBBC05, #EA4335);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
         
         #usernameInput {
@@ -205,7 +189,6 @@
             transform: scale(1.05);
         }
         
-        /* Game header */
         #headerBar {
             position: absolute;
             top: 0;
@@ -267,37 +250,34 @@
             font-size: 1.2rem;
         }
         
-        /* Styles pour l'avatar (image ou SVG) */
         #userProfileAvatar {
             width: 26px;
             height: 26px;
             border-radius: 50%;
             object-fit: cover;
-            display: none; /* Cache par défaut, géré par JS */
+            display: none;
         }
         
         #defaultProfileSvgContainer {
             width: 26px;
             height: 26px;
-            display: flex; /* Pour centrer le SVG */
+            display: flex;
             justify-content: center;
             align-items: center;
-            /* Cache par défaut, géré par JS */
         }
         
         #defaultProfileSvg {
-            width: 24px; /* Légèrement plus petit que le conteneur pour un effet de padding */
+            width: 24px;
             height: 24px;
-            fill: #b19dff; /* Couleur du SVG */
-            vertical-align: middle; /* Alignement avec le texte */
+            fill: #b19dff;
+            vertical-align: middle;
             transition: fill 0.3s ease;
         }
         
         #usernameWrapper:hover #defaultProfileSvg {
-            fill: #f72585; /* Changement de couleur au survol */
+            fill: #f72585;
         }
 
-        /* Canvas */
         canvas {
             position: absolute;
             top: 0;
@@ -307,7 +287,6 @@
             z-index: 1;
         }
         
-        /* Combo notifications */
         .combo-notification-container {
             position: fixed;
             top: 20px;
@@ -329,7 +308,7 @@
             padding: 16px 24px;
             min-width: 200px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.4s ease-out forwards, fadeOut 0.4s ease-out var(--notification-duration) forwards; /* Utilise la variable CSS */
+            animation: slideIn 0.4s ease-out forwards, fadeOut 0.4s ease-out var(--notification-duration) forwards;
             transform: translateX(120%);
             opacity: 0;
             position: relative;
@@ -344,7 +323,7 @@
             width: 100%;
             height: 4px;
             background: linear-gradient(90deg, #f72585, #7209b7);
-            animation: progress var(--notification-duration) linear forwards; /* Utilise la variable CSS */
+            animation: progress var(--notification-duration) linear forwards;
         }
         
         .combo-notification.combo {
@@ -363,44 +342,35 @@
             background: linear-gradient(90deg, #00ffcc, #00b3ff);
         }
 
-        .combo-notification.reset { /* Nouveau style pour le reset */
+        .combo-notification.reset {
             border-left-color: #ff0000;
         }
         .combo-notification.reset::before {
             background: linear-gradient(90deg, #ff0000, #ff6b6b);
         }
 
-
-        /* NOUVEAU STYLE: Texte arc-en-ciel pour les messages de combo */
-        .combo-title, .combo-value {
-             /* Reset any default color here so that the specific classes can apply */
-            color: unset; /* Important for text-fill-color / background-clip to work */
-        }
         .rainbow-text {
             background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: rainbowGradientText 4s linear infinite; /* Animation pour le texte */
-            background-size: 200% 100%; /* Pour l'animation du dégradé */
+            animation: rainbowGradientText 4s linear infinite;
+            background-size: 200% 100%;
         }
 
         @keyframes rainbowGradientText {
             0% { background-position: 0% 50%; }
             100% { background-position: 100% 50%; }
         }
-
-        /* NOUVEAUX STYLES: Couleurs spécifiques pour les paliers de 10 */
-        .text-color-10 { color: #00ff00; } /* Vert vif */
-        .text-color-20 { color: #00ffff; } /* Cyan */
-        .text-color-30 { color: #0000ff; } /* Bleu pur */
-        .text-color-40 { color: #ff00ff; } /* Magenta */
-        .text-color-50 { color: #ff0000; } /* Rouge vif */
-        .text-color-60 { color: #ffa500; } /* Orange */
-        .text-color-70 { color: #ffff00; } /* Jaune */
-        .text-color-80 { color: #800080; } /* Violet foncé */
-        .text-color-90 { color: #008000; } /* Vert foncé */
-
-        /* Couleur par défaut pour les combos < 10 et non-multiples de 10 */
+        
+        .text-color-10 { color: #00ff00; }
+        .text-color-20 { color: #00ffff; }
+        .text-color-30 { color: #0000ff; }
+        .text-color-40 { color: #ff00ff; }
+        .text-color-50 { color: #ff0000; }
+        .text-color-60 { color: #ffa500; }
+        .text-color-70 { color: #ffff00; }
+        .text-color-80 { color: #800080; }
+        .text-color-90 { color: #008000; }
         .text-default { color: #ffcc00; }
         
         .combo-title {
@@ -445,7 +415,6 @@
             to { width: 0%; }
         }
         
-        /* Header toggle */
         #headerToggle {
             position: fixed;
             top: 20px;
@@ -479,7 +448,42 @@
             transform: rotate(180deg);
         }
         
-        /* Responsive design */
+        .firebase-info {
+            position: fixed;
+            bottom: 15px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #b19dff;
+            font-size: 0.85rem;
+            z-index: 10;
+        }
+        #authStatus {
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #b19dff;
+            word-break: break-all;
+            text-align: center;
+            background: rgba(30, 30, 50, 0.7);
+            padding: 10px 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+        
+        .error-message {
+            background-color: #f44336; 
+            color: white; 
+            padding: 10px; 
+            margin-top: 10px; 
+            border-radius: 5px;
+            text-align: center;
+        }
+        
         @media (max-width: 768px) {
             .score-section {
                 flex-direction: column;
@@ -519,76 +523,12 @@
                 min-width: 160px;
                 padding: 10px 15px;
                 font-size: 0.9rem;
-                /* Animation duration is now dynamic, so remove fixed values */
-                animation: slideIn 0.4s ease-out forwards, fadeOut 0.4s ease-out var(--notification-duration) forwards;
             }
-            
-            .combo-title {
-                font-size: 1rem;
-            }
-            
-            .combo-value {
-                font-size: 1.3rem;
-                margin: 5px 0;
-            }
-            
-            .combo-message {
-                font-size: 0.8rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .combo-notification {
-                min-width: 140px; /* encore plus petit sur très petit écran */
-                padding: 8px 12px;
-                font-size: 0.8rem;
-            }
-            
-            .combo-title {
-                font-size: 0.9rem;
-            }
-            
-            .combo-value {
-                font-size: 1.2rem;
-            }
-            
-            .combo-message {
-                font-size: 0.7rem;
-            }
-        }
-        
-        /* Firebase config info */
-        .firebase-info {
-            position: fixed;
-            bottom: 15px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            color: #b19dff;
-            font-size: 0.85rem;
-            z-index: 10;
-        }
-        #authStatus { /* Nouveau style pour le statut d'authentification */
-            margin-top: 20px;
-            font-size: 1.1em;
-            color: #b19dff;
-            word-break: break-all;
-            text-align: center;
-            background: rgba(30, 30, 50, 0.7);
-            padding: 10px 20px;
-            border-radius: 8px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            /* Place it in the flow, not fixed for now to avoid overlaps with auth menus */
-            margin-left: auto;
-            margin-right: auto;
-            display: block; /* S'assurer qu'il prend sa propre ligne */
         }
     </style>
 </head>
 <body>
-       <div id="loadingOverlay">
+    <div id="loadingOverlay">
         <div class="loader-container">
             <div class="loader-title"><i class="fas fa-gamepad"></i> Screen Clicker Pro</div>
             <div class="loader-bar-wrap">
@@ -657,12 +597,12 @@
     </div>
 
     <script type="module">
-        // Configuration Firebase
+        // Configuration Firebase corrigée
         const firebaseConfig = {
             apiKey: "AIzaSyB5y97C6OC5HLMB9WkdII5PpUOsfFtdqgk",
             authDomain: "screen-clicker-2010.firebaseapp.com",
             projectId: "screen-clicker-2010",
-            storageBucket: "screen-clicker-2010.firebasestorage.app",
+            storageBucket: "screen-clicker-2010.appspot.com", // Corrigé
             messagingSenderId: "47509252596",
             appId: "1:47509252596:web:b9e49f5b0ca9ff6b8a71a1",
             measurementId: "G-WF9SYRQBVT"
@@ -681,7 +621,7 @@
         let score = 0;
         let comboCount = 0;
         let lastClickTime = 0;
-        const comboTimeout = 500; // 500ms = 0.5 seconde (plus facile)
+        const comboTimeout = 500;
         let hue = 0;
         let circles = [];
         let particles = [];
@@ -700,22 +640,18 @@
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'error-message'; 
                 errorDiv.textContent = message;
-                errorDiv.style.cssText = `
-                    background-color: #f44336; 
-                    color: white; 
-                    padding: 10px; 
-                    margin-top: 10px; 
-                    border-radius: 5px;
-                    text-align: center;
-                `;
                 notificationContainer.appendChild(errorDiv);
                 setTimeout(() => errorDiv.remove(), 5000); 
             }
         }
         
-        // --- Gestion des visiteurs ---
+        // --- Gestion des visiteurs CORRIGÉE ---
         async function trackVisitor() {
             try {
+                // Vérifier si le visiteur est nouveau
+                const hasVisitedBefore = localStorage.getItem('hasVisitedBefore');
+                const isReturn = !!hasVisitedBefore;
+                
                 // Créer un ID visiteur s'il n'existe pas
                 let visitorId = localStorage.getItem('visitorId');
                 if (!visitorId) {
@@ -723,35 +659,36 @@
                     localStorage.setItem('visitorId', visitorId);
                 }
                 
+                // Marquer comme ayant visité
+                localStorage.setItem('hasVisitedBefore', 'true');
+                
                 // Préparer les données du visiteur
                 const visitorData = {
                     id: visitorId,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    isReturn: localStorage.getItem('hasVisitedBefore') ? true : false,
+                    isReturn: isReturn,
                     userAgent: navigator.userAgent,
                     screen: `${window.screen.width}x${window.screen.height}`,
-                    language: navigator.language
+                    language: navigator.language,
+                    date: new Date().toISOString().split('T')[0] // Pour faciliter les requêtes
                 };
                 
-                // Marquer comme ayant visité
-                localStorage.setItem('hasVisitedBefore', 'true');
-                
-                // Enregistrer dans Firestore
-                await db.collection('visitors').doc(visitorId).set(visitorData, { merge: true });
+                // CORRECTION: Utilisation de set avec merge pour éviter les erreurs
+                await db.collection('visitors').doc(visitorId).set(visitorData);
                 
                 // Envoyer l'événement à Analytics
                 analytics.logEvent('visit_tracked', {
                     visitor_id: visitorId,
-                    is_return: visitorData.isReturn
+                    is_return: isReturn
                 });
                 
             } catch (error) {
                 console.error("Erreur suivi visiteur:", error);
-                displayError("Erreur de suivi des visiteurs");
+                // Ne pas afficher d'erreur pour l'utilisateur
             }
         }
 
-        // --- Gestion utilisateur ---
+        // --- Gestion utilisateur CORRIGÉE ---
         async function createOrUpdateUserProfile(user, username = null, initialHighscore = 0) {
             const userRef = db.collection('users').doc(user.uid); 
             try {
@@ -770,8 +707,8 @@
                         ea: user.providerData.some(p => p.providerId === 'password'),
                         ga: user.providerData.some(p => p.providerId === 'google.com'),
                         ia: user.isAnonymous, 
-                        ca: firebase.firestore.FieldValue.serverTimestamp(), 
-                        lp: firebase.firestore.FieldValue.serverTimestamp()  
+                        ca: firebase.firestore.FieldValue.serverTimestamp(),
+                        lp: firebase.firestore.FieldValue.serverTimestamp()
                     };
                     await userRef.set(userData);
                     playerName = userData.un;
@@ -780,7 +717,7 @@
                     setupGame();
                 } else { 
                     const existingData = docSnap.data();
-                    await userRef.update({ lp: firebase.firestore.FieldValue.serverTimestamp() }); 
+                    await userRef.update({ lp: firebase.firestore.FieldValue.serverTimestamp() });
                     playerName = existingData.un || 'Joueur' + user.uid.substring(0, 6);
                     playerHighscore = existingData.hs || 0;
                     updateAvatarDisplay(existingData.av); 
@@ -904,38 +841,25 @@
             }
         }
         
-        // FONCTION DE COULEUR CORRIGÉE POUR LES PALIERS DE 10
         function getCircleColor(combo) {
-            // Effet arc-en-ciel pour combos >= 100
             if (combo >= 100) {
                 hue = (hue + 5) % 360;
                 return `hsl(${hue}, 100%, 60%)`;
             }
             
-            // Détermine le palier (10, 20, 30, etc.)
             const palier = Math.floor(combo / 10);
             
-            // Assignation de couleurs fixes pour chaque palier
             switch(palier) {
-                case 1: // 10-19
-                    return '#00ff00'; // Vert
-                case 2: // 20-29
-                    return '#00ffff'; // Cyan
-                case 3: // 30-39
-                    return '#0000ff'; // Bleu
-                case 4: // 40-49
-                    return '#ff00ff'; // Magenta
-                case 5: // 50-59
-                    return '#ff0000'; // Rouge
-                case 6: // 60-69
-                    return '#ffa500'; // Orange
-                case 7: // 70-79
-                    return '#ffff00'; // Jaune
-                case 8: // 80-89
-                    return '#800080'; // Violet
-                case 9: // 90-99
-                    return '#008000'; // Vert foncé
-                default: // Combos < 10
+                case 1: return '#00ff00';
+                case 2: return '#00ffff';
+                case 3: return '#0000ff';
+                case 4: return '#ff00ff';
+                case 5: return '#ff0000';
+                case 6: return '#ffa500';
+                case 7: return '#ffff00';
+                case 8: return '#800080';
+                case 9: return '#008000';
+                default: 
                     const defaultColors = ['#ff6b6b', '#4ecdc4', '#ffbe0b'];
                     return defaultColors[Math.min(combo, defaultColors.length-1)];
             }
@@ -947,12 +871,10 @@
                 return;
             }
             
-            // Fond animé
             hue = (hue + 0.2) % 360;
             ctx.fillStyle = `hsl(${hue}, 60%, 10%)`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Effet de particules en arrière-plan pour combos >= 10
             if (comboCount >= 10) {
                 for (let i = 0; i < 2; i++) {
                     const x = Math.random() * canvas.width;
@@ -961,24 +883,20 @@
                     ctx.beginPath();
                     ctx.arc(x, y, size, 0, Math.PI * 2);
                     
-                    // Couleur des particules basée sur le combo
                     const particleHue = (hue + 120) % 360;
                     ctx.fillStyle = `hsla(${particleHue}, 100%, 70%, ${0.2 + (comboCount/200)})`;
                     ctx.fill();
                 }
             }
             
-            // Cercles
             circles.forEach((circle, idx) => {
                 const circleColor = getCircleColor(comboCount);
                 ctx.beginPath();
                 ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI*2);
                 
-                // Épaisseur du cercle basée sur le combo
                 ctx.lineWidth = 3 + (comboCount / 10);
                 ctx.strokeStyle = circleColor;
                 
-                // Effet de lueur pour les gros cercles
                 if (circle.radius > 15) {
                     ctx.shadowColor = circleColor;
                     ctx.shadowBlur = 15 + comboCount;
@@ -988,18 +906,15 @@
                 ctx.closePath();
                 ctx.shadowBlur = 0;
                 
-                // Agrandissement du cercle basé sur le combo
                 circle.radius += 1 + (comboCount / 20);
                 circle.age += 1;
                 
-                // Supprimer les cercles trop gros
                 if (circle.radius >= 50) {
                     createExplosion(circle.x, circle.y, circleColor);
                     circles.splice(idx, 1);
                 }
             });
             
-            // Particules d'explosion
             particles.forEach((p, idx) => {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
@@ -1051,68 +966,26 @@
             let comboClass = 'combo'; 
             let textColorClass = 'text-default'; 
 
-            // Durée d'affichage dynamique
             const duration = Math.min(3000, 500 + combo * 100);
             notification.style.setProperty('--notification-duration', `${duration}ms`);
             
-            // Effets spéciaux pour paliers de 10
             if (combo % 10 === 0 && combo > 0) { 
                 comboClass = 'level-up';
                 
-                // Messages spécifiques pour les paliers
                 switch(combo) {
-                    case 10:
-                        title = "COMBO DE 10!";
-                        message = "Couleur verte activée!";
-                        textColorClass = 'text-color-10';
-                        break;
-                    case 20:
-                        title = "COMBO DE 20!";
-                        message = "Couleur cyan activée!";
-                        textColorClass = 'text-color-20';
-                        break;
-                    case 30:
-                        title = "COMBO DE 30!";
-                        message = "Couleur bleue activée!";
-                        textColorClass = 'text-color-30';
-                        break;
-                    case 40:
-                        title = "COMBO DE 40!";
-                        message = "Couleur magenta activée!";
-                        textColorClass = 'text-color-40';
-                        break;
-                    case 50:
-                        title = "COMBO DE 50!";
-                        message = "Couleur rouge activée!";
-                        textColorClass = 'text-color-50';
-                        break;
-                    case 60:
-                        title = "COMBO DE 60!";
-                        message = "Couleur orange activée!";
-                        textColorClass = 'text-color-60';
-                        break;
-                    case 70:
-                        title = "COMBO DE 70!";
-                        message = "Couleur jaune activée!";
-                        textColorClass = 'text-color-70';
-                        break;
-                    case 80:
-                        title = "COMBO DE 80!";
-                        message = "Couleur violette activée!";
-                        textColorClass = 'text-color-80';
-                        break;
-                    case 90:
-                        title = "COMBO DE 90!";
-                        message = "Couleur vert foncé activée!";
-                        textColorClass = 'text-color-90';
-                        break;
-                    default:
-                        title = `COMBO DE ${combo}!`;
-                        message = "Nouvelle couleur débloquée!";
+                    case 10: title = "COMBO DE 10!"; message = "Couleur verte activée!"; textColorClass = 'text-color-10'; break;
+                    case 20: title = "COMBO DE 20!"; message = "Couleur cyan activée!"; textColorClass = 'text-color-20'; break;
+                    case 30: title = "COMBO DE 30!"; message = "Couleur bleue activée!"; textColorClass = 'text-color-30'; break;
+                    case 40: title = "COMBO DE 40!"; message = "Couleur magenta activée!"; textColorClass = 'text-color-40'; break;
+                    case 50: title = "COMBO DE 50!"; message = "Couleur rouge activée!"; textColorClass = 'text-color-50'; break;
+                    case 60: title = "COMBO DE 60!"; message = "Couleur orange activée!"; textColorClass = 'text-color-60'; break;
+                    case 70: title = "COMBO DE 70!"; message = "Couleur jaune activée!"; textColorClass = 'text-color-70'; break;
+                    case 80: title = "COMBO DE 80!"; message = "Couleur violette activée!"; textColorClass = 'text-color-80'; break;
+                    case 90: title = "COMBO DE 90!"; message = "Couleur vert foncé activée!"; textColorClass = 'text-color-90'; break;
+                    default: title = `COMBO DE ${combo}!`; message = "Nouvelle couleur débloquée!";
                 }
             }
             
-            // Effet arc-en-ciel pour combo 100+
             if (combo >= 100) {
                 textColorClass = 'rainbow-text';
                 title = "ULTRA COMBO!";
@@ -1162,7 +1035,6 @@
             const y = event.clientY - rect.top;
             const now = Date.now(); 
             
-            // CORRECTION: Gestion robuste de l'intervalle entre clics
             if (lastClickTime > 0) {
                 const timeDiff = now - lastClickTime;
                 
@@ -1174,22 +1046,18 @@
                 }
             }
             
-            // Incrémenter le combo et mettre à jour le temps du dernier clic
             comboCount++;
             lastClickTime = now;
             comboEl.textContent = comboCount + 'x';
             
-            // Notifications pour les paliers de 10
             if (comboCount % 10 === 0) {
                 showComboNotification(comboCount);
             }
             
-            // Score et cercles
             score += comboCount;
             scoreEl.textContent = score;
             createCircle(x, y);
             
-            // Gestion du record
             if (score > playerHighscore) {
                 playerHighscore = score;
                 playerHsEl.textContent = playerHighscore;
@@ -1204,7 +1072,7 @@
             try {
                 await db.collection('users').doc(user.uid).update({
                     hs: playerHighscore, 
-                    lp: firebase.firestore.FieldValue.serverTimestamp() 
+                    lp: firebase.firestore.FieldValue.serverTimestamp()
                 });
             } catch (error) {
                 console.error("Erreur sauvegarde score:", error);
@@ -1284,7 +1152,6 @@
         }
         
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialisation des références DOM
             overlay = document.getElementById('loadingOverlay');
             authMenu = document.getElementById('authMenu');
             usernamePrompt = document.getElementById('usernamePrompt');
@@ -1295,13 +1162,10 @@
             suggestionsDiv = document.getElementById('suggestions');
             suggestionList = document.getElementById('suggestionList');
             
-            // Canvas
             canvas = document.getElementById('canvas');
             
             if (canvas) {
                 ctx = canvas.getContext('2d');
-            } else {
-                console.error("Élément canvas introuvable");
             }
             
             scoreEl = document.getElementById('score');
@@ -1356,7 +1220,7 @@
                 }
             });
             
-            // Suivi du visiteur
+            // Suivi du visiteur - corrigé
             trackVisitor();
         });
     </script>
